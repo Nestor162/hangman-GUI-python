@@ -1,5 +1,7 @@
 import PySimpleGUI as sg
 from string import ascii_uppercase
+from random import choice
+
 
 MAX_WRONG_GUESSES = 6
 
@@ -21,28 +23,33 @@ class Hangman:
             ],
         ]
 
-        self.window = sg.Window(
+        self._window = sg.Window(
             title="Hangman",
             layout=self.layout,
             finalize=True,
         )
 
-        self._canvas = self.window["-CANVAS-"]
+        self._canvas = self._window["-CANVAS-"]
 
-        # Temporary code
-        self._draw_scaffold()
-        for index in range(MAX_WRONG_GUESSES):
-            self._wrong_guesses = index + 1
-            self._draw_hanged_man()
+        self._new_game()
 
     def read_event(self):
-        event = self.window.read()
+        event = self._window.read()
         event_id = event[0] if event is not None else None
         return event_id
 
-    def close_window(self):
-        self.window.close()
+    def process_event(self, event):
+        if event[:8] == "-letter-":
+            self._play(letter=event[8])
+        elif event == "-RESTART-":
+            self._restart_game()
+        elif event == "-NEW-":
+            self._new_game()
 
+    def close_window(self):
+        self._window.close()
+
+    # Methods to build and draw the graphycs
     def _build_cavas_frame(self):
         """
         Builds the canvas frame that will display the hangman graphics.
@@ -200,6 +207,76 @@ class Hangman:
             ],
         )
 
+    def _build_guessed_word(self):
+        # Builds the guessed word string to display.
+        # For each letter in the target word,
+        # Check if it is in the guessed letters.
+        # If so, add the letter, otherwise add an underscore.
+        # Join the list of letters/underscores into a space separated string.
+        current_letters = []
+        for letter in self._target_word:
+            if letter in self._guessed_letters:
+                current_letters.append(letter)
+            else:
+                current_letters.append("_")
+        return " ".join(current_letters)
+
+    # Methods that define the game logic
+    def _play(self, letter):
+        # Checks if the guessed letter is in the target word.
+        # If the letter IS NOT in the word,
+        # it increments the wrong guess count
+
+        if letter not in self._target_word:
+            self._wrong_guesses += 1
+
+        # Otherwise, if the letter  IS in the target word,
+        # it adds the letter to the guessed letters and
+        # updates the guessed word.
+        self._guessed_letters.add(letter)
+        self._guessed_word = self._build_guessed_word()
+
+        # Update GUI
+        self._window[f"-letter-{letter}-"].update(disabled=True)
+        self._window["-DISPLAY-WORD-"].update(self._guessed_word)
+        self._draw_hanged_man()
+
+    def _select_word(self):
+        # Selects a random word from the word list file to use as the target word.
+        with open("words.txt", mode="r", encoding="utf-8") as words:
+            word_list = words.readlines()
+        return choice(word_list).strip().upper()
+
+    def _new_game(self):
+        # Selects a new random word as the target word for the game
+        # and resets the game state to start a new game
+        self._target_word = self._select_word()
+        self._restart_game()
+
+    def _restart_game(self):
+        # Restarts the game by resetting the game guessed letters, the mistakes and clearing the screen. The current word stays the same
+        self._guessed_letters = set()
+        self._wrong_guesses = 0
+        self._guessed_word = self._build_guessed_word()
+
+        # Redraw the GUI
+        self._canvas.erase()
+        self._draw_scaffold()
+        for letter in ascii_uppercase:
+            self._window[f"-letter-{letter}-"].update(disabled=False)
+        self._window["-DISPLAY-WORD-"].update(self._guessed_word)
+
+    def is_over(self):
+        # Checks if the game is over by returning True if either:
+        # - The number of wrong guesses equals the max allowed wrong guesses
+        # - All letters of the target word have been guessed
+        return any(
+            [
+                self._wrong_guesses == MAX_WRONG_GUESSES,
+                set(self._target_word).issubset(self._guessed_letters),
+            ]
+        )
+
 
 """
 This (if name == "main") is known as the "name-main idiom" in Python
@@ -212,8 +289,9 @@ if __name__ == "__main__":
     # Main entry point for running the Hangman game.
     # The main loop repeatedly reads events from the user ( clicks, keypresses, etc) and breaks when the window is closed.
     game = Hangman()
-    while True:
+    while not game.is_over():
         event_id = game.read_event()
         if event_id in {sg.WIN_CLOSED}:
             break
+        game.process_event(event_id)
     game.close_window()
