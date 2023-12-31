@@ -1,0 +1,41 @@
+# Virtual environment folders
+venv/  
+env/
+
+# Configuration files
+.vscode/
+.idea/
+
+# Compiled Python files
+__pycache__/
+*.pyc
+
+# Log files 
+logs/
+*.log
+
+# Database files
+*.db
+
+# Distribution files 
+dist/
+build/
+*.egg-info/
+
+# Conventionally ignored files
+.DS_Store
+Thumbs.db
+
+# Binary files
+*.exe
+*.dll
+
+# Temporary files
+*.tmp
+*~
+
+# Test files
+test_*.py  
+
+# Generated documentation files
+docs/_build/
