@@ -1,6 +1,8 @@
 import PySimpleGUI as sg
 from string import ascii_uppercase
 
+MAX_WRONG_GUESSES = 6
+
 
 class Hangman:
     # Initializes the Hangman game window and stores it in the "window" variable
@@ -18,6 +20,7 @@ class Hangman:
                 self._build_action_buttons_frame(),
             ],
         ]
+
         self.window = sg.Window(
             title="Hangman",
             layout=self.layout,
@@ -56,20 +59,27 @@ class Hangman:
 
     def _build_letters_frame(self):
         letter_groups = [
-            ascii_uppercase[i : i + 4] for i in range(0, len(ascii_uppercase), 4)
+            # Splits the uppercase ASCII letters into groups of 4 for
+            # displaying as buttons on the hangman interface.
+            ascii_uppercase[i : i + 4]
+            for i in range(0, len(ascii_uppercase), 4)
         ]
+
         letter_buttons = [
+            # Uses a nested list comprehension to generate a button for each letter
+            # Results in a grid of letter buttons used to make guesses.
             [
                 sg.Button(
-                    button_text=f"{letter} ",
+                    button_text=f" {letter} ",
                     font="Courier 20",
                     border_width=0,
                     button_color=(None, sg.theme_background_color()),
-                    key=f"-letter-{letter}",
+                    key=f"-letter-{letter}-",
                     enable_events=True,
                 )
-                for letter in letter_groups
+                for letter in letter_group
             ]
+            for letter_group in letter_groups
         ]
 
         return sg.Column(
