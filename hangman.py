@@ -33,6 +33,8 @@ class Hangman:
 
         self._new_game()
 
+        self.quit = False
+
     def read_event(self):
         event = self._window.read()
         event_id = event[0] if event is not None else None
@@ -277,6 +279,21 @@ class Hangman:
             ]
         )
 
+    def check_winner(self):
+        if self._wrong_guesses < MAX_WRONG_GUESSES:
+            answer = sg.PopupYesNo(
+                "You've won! Congratulations!\n" "Another round?",
+                title="Winner!",
+            )
+        else:
+            answer = sg.PopupYesNo(
+                f"You've lost! The word was '{self._target_word}'.\n" "Another round?",
+                title="Sorry!",
+            )
+        self.quit = answer == "No"
+        if not self.quit:
+            self._new_game()
+
 
 """
 This (if name == "main") is known as the "name-main idiom" in Python
@@ -289,9 +306,20 @@ if __name__ == "__main__":
     # Main entry point for running the Hangman game.
     # The main loop repeatedly reads events from the user ( clicks, keypresses, etc) and breaks when the window is closed.
     game = Hangman()
-    while not game.is_over():
-        event_id = game.read_event()
-        if event_id in {sg.WIN_CLOSED}:
-            break
-        game.process_event(event_id)
+
+    # The main loop
+    # If the quit variable is True, exit the main loop and closes the window
+    while not game.quit:
+        # Executes this loop until the is_over method returns True
+        while not game.is_over():
+            event_id = game.read_event()
+            if event_id in {sg.WIN_CLOSED, "-QUIT-"}:
+                game.quit = True
+                break
+            game.process_event(event_id)
+
+        # If the game is over, check if the player won or lost
+        if not game.quit:
+            game.check_winner()
+
     game.close_window()
