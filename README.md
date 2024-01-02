@@ -14,8 +14,7 @@ This project implements a graphical version of the classic hangman game in Pytho
 ## Project Overview
 
 ### Gameplay demo
-
-gameplay.gif
+![hangman_python_demo](https://github.com/Nestor162/hangman-GUI-python/assets/113930607/2926b6b2-d954-4042-8912-80b8e63ffe2e)
 
 This project implements a hangman game in Python with a graphical interface using PySimpleGUI.
 
