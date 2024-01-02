@@ -68,3 +68,7 @@ Some potential enhancements for the future:
   - Enhance user experience by integrating custom sound effects, emphasizing key actions within the game. Explore available Python options for playing sounds.
 - **Keyboard Input:**
   - Enable keyboard input for a more interactive and intuitive gaming experience, allowing players to make guesses directly from the keyboard.
+
+
+## Credit
+This project was inspired by and developed with the guidance of the [tutorial](https://realpython.com/hangman-python-pysimplegui/) provided by Real Python.
